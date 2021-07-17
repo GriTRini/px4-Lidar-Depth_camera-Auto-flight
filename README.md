@@ -133,5 +133,37 @@ cd ~/catkin_ws && catkin build f450 && source devel/setup.bash
 roslaunch px4 display.launch
 ```
 - 만약 오류가 난다면 오류 내용을 보고 패키지를 설치하면 된다.
+- ![Screenshot from 2021-07-17 18-14-45](https://user-images.githubusercontent.com/43773374/126032754-35102308-6a0f-4731-baac-7660eb94e621.png)
+- 저는 이러한 오류가 떴는데 해당 joint_state_publisher_gui를 설치한 후에 state_publisher를 설치하였다.
+- melodic 버전을 확인하고 설치하면 된다.
+- https://github.com/ros/joint_state_publisher 여기 사이트에 들어가서 주소를 복사한다음에 catkin build 실행
+```
+cd catkin_ws/src
+```
+```
+git clone https://github.com/ros/joint_state_publisher.git
+```
+```
+cd .. && catkin build
+```
+- 만약 state_publisher 오류가 뜬다면 밑의 내용을 실행한다.
+```
+cd catkin_ws/src
+```
+```
+git clone https://github.com/ros/robot_state_publisher.git
+```
+```
+cd .. && catkin build
+```
+
+- 이후에 밑에 내용을 실행한다.
+```
+ roslaunch f450 display.launch
+ ```
+ - 
+ ![Screenshot from 2021-07-17 18-38-39](https://user-images.githubusercontent.com/43773374/126032892-b5fc2d74-c9f6-4fb7-9874-416852e96e14.png)
+ 
+
 
 
