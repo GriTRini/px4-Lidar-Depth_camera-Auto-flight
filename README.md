@@ -108,6 +108,10 @@ roslaunch px4 mavros_posix_sitl.launch
 roslaunch px4 mavros_posix_sitl.launch
 ```
 
+- 만약 오류가 난다면 혹시 .ros 파일에 있는 airframe 안에 처음에 넣었던 1026_custom_f450 파일이 있는지 확인하라는 오류인지 확인해야한다.
+- 저는 해당 오류가 떠서 .ros파일안 경로에 들어가서 처음에 복사 붙여넣기한 1026_custom_f450파일을 airframe 파일안에 넣었다.
+- 그리고 나서 다시 실행하니 gazebo에서 실행이 되었다.
+
 
 
 ## 6. qgroundcontrol을 설치한다.
