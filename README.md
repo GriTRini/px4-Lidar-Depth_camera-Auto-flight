@@ -183,6 +183,37 @@ cd .. && catkin build
  - 
  ![Screenshot from 2021-07-17 18-38-39](https://user-images.githubusercontent.com/43773374/126032892-b5fc2d74-c9f6-4fb7-9874-416852e96e14.png)
  
+## 8. 카메라 축 변경
+- 먼저 카메라 링크를 수정해야 한다.
+```
+cd ~/PX4-Autopilot/Tools/sitl_gazebo/models/custom_f450 && gedit custom_f450.sdf
+```
+- <frameName>camera_link</frameName>를 다음과 처럼 <frameName>d435_link</frameName> 바꿔준다.
+
+- 카메라 축을 변경하기 위해서는 joint 된 축을 변경해야 한다.
+```
+cd ~/catkin_ws/src/f450/urdf && gedit f450.urdf
+```
+- 실행하면 이러한 창이 뜬다.
+- 카메라와 base_link를 서로 joint한 곳을 찾아서 축을 수정한다.
+- 처음에는 000 으로 되어있다.
+
+사진
+
+- 해당 부분을 위의 사진중에서 rpy="-1.5707 0 -1.5707" 로 수정한다.
+
+
+
+## 9. 실행
+
+- 터미널 창에 명령어를 입력한다.
+```
+roslaunch px4 mavros_posix_sitl.launch
+```
+
+```
+roslaunch px4 display.launch
+```
 
 
 
