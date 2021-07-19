@@ -133,6 +133,8 @@ roslaunch px4 mavros_posix_sitl.launch
 
 https://docs.qgroundcontrol.com/master/en/getting_started/download_and_install.html
 
+- 
+![Screenshot from 2021-07-19 09-18-26](https://user-images.githubusercontent.com/43773374/126086777-e09dbb74-f5f2-4b72-a25f-bb4c631d2580.png)
 
 ## 7. 다운받은 custom_f450 파일 rviz에서 수정하기
 
