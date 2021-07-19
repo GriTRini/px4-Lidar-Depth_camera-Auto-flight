@@ -149,7 +149,7 @@ cd ~/catkin_ws && catkin build f450 && source devel/setup.bash
 ```
 - 그다음 launch파일을 실행 시키면 된다.
 ```
-roslaunch px4 display.launch
+roslaunch f450 display.launch
 ```
 - 만약 오류가 난다면 오류 내용을 보고 패키지를 설치하면 된다.
 - ![Screenshot from 2021-07-17 18-14-45](https://user-images.githubusercontent.com/43773374/126032754-35102308-6a0f-4731-baac-7660eb94e621.png)
