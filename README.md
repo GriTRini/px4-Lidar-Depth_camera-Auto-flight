@@ -188,17 +188,22 @@ cd .. && catkin build
 ```
 cd ~/PX4-Autopilot/Tools/sitl_gazebo/models/custom_f450 && gedit custom_f450.sdf
 ```
+![Screenshot from 2021-07-19 17-25-22](https://user-images.githubusercontent.com/43773374/126128406-f653a3b0-af14-442c-88d2-d5b3ec20b9a9.png)
+
 - <frameName>camera_link</frameName>를 다음과 처럼 <frameName>d435_link</frameName> 바꿔준다.
 
 - 카메라 축을 변경하기 위해서는 joint 된 축을 변경해야 한다.
 ```
 cd ~/catkin_ws/src/f450/urdf && gedit f450.urdf
 ```
+![Screenshot from 2021-07-19 17-20-54](https://user-images.githubusercontent.com/43773374/126128383-0bc97acb-3453-432e-96ec-f191b6aadf23.png)
+
 - 실행하면 이러한 창이 뜬다.
 - 카메라와 base_link를 서로 joint한 곳을 찾아서 축을 수정한다.
 - 처음에는 000 으로 되어있다.
 
-사진
+![Screenshot from 2021-07-19 17-22-22](https://user-images.githubusercontent.com/43773374/126128395-00ad19e9-f06e-4cde-a74f-a67c4b276007.png)
+
 
 - 해당 부분을 위의 사진중에서 rpy="-1.5707 0 -1.5707" 로 수정한다.
 
