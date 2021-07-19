@@ -175,7 +175,14 @@ git clone https://github.com/ros/robot_state_publisher.git
 ```
 cd .. && catkin build
 ```
+![스크린샷, 2021-07-19 20-21-18](https://user-images.githubusercontent.com/43773374/126152811-1d583462-a290-4f5f-ad8c-43d224992538.png)
 
+- 만약 사진과 같은 오류가 뜬다면 밑의 코드를 실행해라
+```
+sudo apt update
+sudo apt install ros-<your_ros_version>-joint-state-publisher-gui
+```
+- ubuntu 16.04 이면 kinetic, ubuntu 18.04 이면 melodic, ubuntu 20.04 이면 noetic이다.
 - 이후에 밑에 내용을 실행한다.
 ```
  roslaunch f450 display.launch
