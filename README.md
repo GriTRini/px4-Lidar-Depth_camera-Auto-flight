@@ -356,7 +356,8 @@ cd ORB_SLAM2
 chmod +x build.sh
 ./build.sh
 ```
-사진
+![다운로드](https://user-images.githubusercontent.com/43773374/126584130-eff83378-e971-4b04-92aa-64d2deafb93b.png)
+
 
 - 위와 같은 오류가 뜬다.
 
@@ -412,7 +413,9 @@ export ROS_PACKAGE_PATH=${ROS_PACKAGE_PATH}:~/ORB_SLAM2/Examples/ROS
 chmod +x build_ros.sh
 ./build_ros.sh
 ```
-사진
+![다운로드 (1)](https://user-images.githubusercontent.com/43773374/126584120-7a2c912f-9923-4b54-b8c1-9105bb87d0b8.png)
+
+
 - 해결방법 - 1
 -  ~/ORB_SLAM2/build_ros.sh
 ```
@@ -428,7 +431,9 @@ make -j2
 
 - 해결방법 - 2
 -  ~/ORB_SLAM2/Examples/ROS/ORB_SLAM2/CMakeLists.txt
-사진
+![다운로드 (2)](https://user-images.githubusercontent.com/43773374/126584111-76ff1759-5bca-4c3b-b20a-97f3d6dedfee.png)
+
+
 - 위의 초록색 사진의 해당 행을 추가한다.
 
 
