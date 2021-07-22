@@ -1,5 +1,83 @@
 # px4-project
-## 1. px4 파일 설치
+## 1 .opencv 설치
+- ros를 설치하기 전에 먼저 opencv를 설치해야 한다.
+- (1) 업데이트
+```
+sudo apt-get update
+sudo apt-get upgrade
+```
+- (2) 필요한 라이브러리 설치
+```
+sudo apt-get install python2.7-dev python3-dev python-numpy python3-numpy
+
+sudo apt-get install libjpeg-dev libpng-dev libtiff-dev
+sudo apt-get install libavcodec-dev libavformat-dev libswscale-dev libv4l-dev v4l-utils 
+sudo apt-get install libxvidcore-dev libx264-dev libxine2-dev
+sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+sudo apt-get install libgtk-3-dev
+sudo apt-get install mesa-utils libgl1-mesa-dri libgtkgl2.0-dev libgtkglext1-dev
+sudo apt-get install libatlas-base-dev gfortran libeigen3-dev
+```
+- (3) opencv 설치
+```
+mkdir opencv
+cd opencv
+wget -O opencv.zip https://github.com/opencv/opencv/archive/3.4.0.zip
+wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/3.4.0.zip
+
+unzip opencv.zip
+unzip opencv_contrib.zip
+
+cd opencv-3.4.0
+mkdir build
+cd build
+```
+- (4) opencv 빌드
+```
+cmake -D CMAKE_BUILD_TYPE=RELEASE \
+-D CMAKE_INSTALL_PREFIX=/usr/local \
+-D WITH_TBB=OFF \
+-D WITH_IPP=OFF \
+-D WITH_1394=OFF \
+-D BUILD_WITH_DEBUG_INFO=OFF \
+-D BUILD_DOCS=OFF \
+-D INSTALL_C_EXAMPLES=ON \
+-D INSTALL_PYTHON_EXAMPLES=ON \
+-D BUILD_EXAMPLES=OFF \
+-D BUILD_TESTS=OFF \
+-D BUILD_PERF_TESTS=OFF \
+-D WITH_QT=OFF \
+-D WITH_GTK=ON \
+-D WITH_OPENGL=ON \
+-D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib-3.4.0/modules \
+-D WITH_V4L=ON  \
+-D WITH_FFMPEG=ON \
+-D WITH_XINE=ON \
+-D BUILD_NEW_PYTHON_SUPPORT=ON \
+-D PYTHON2_INCLUDE_DIR=/usr/include/python2.7 \
+-D PYTHON2_NUMPY_INCLUDE_DIRS=/usr/lib/python2.7/dist-packages/numpy/core/include/ \
+-D PYTHON2_PACKAGES_PATH=/usr/lib/python2.7/dist-packages \
+-D PYTHON2_LIBRARY=/usr/lib/x86_64-linux-gnu/libpython2.7.so \
+-D PYTHON3_INCLUDE_DIR=/usr/include/python3.6m \
+-D PYTHON3_NUMPY_INCLUDE_DIRS=/usr/lib/python3/dist-packages/numpy/core/include/  \
+-D PYTHON3_PACKAGES_PATH=/usr/lib/python3/dist-packages \
+-D PYTHON3_LIBRARY=/usr/lib/x86_64-linux-gnu/libpython3.6m.so \
+../
+```
+```
+#방열판이 있을경우
+make -j4
+#방열판이 없을경우
+make -j2
+```
+- (5) opencv 컴파일
+```
+sudo make install
+sudo sh -c 'echo '/usr/local/lib' > /etc/ld.so.conf.d/opencv.conf'
+sudo ldconfig
+```
+
+## 2. px4 파일 설치
 - 밑에 홈페이지에서 받으면 된다.  
 
 홈페이지는 https://docs.px4.io/master/en/dev_setup/dev_env_linux_ubuntu.html#gazebo-jmavsim-and-nuttx-pixhawk-targets 이다.
@@ -227,5 +305,168 @@ roslaunch px4 mavros_posix_sitl.launch
 roslaunch px4 display.launch
 ```
 
+## 10. orb slam2 설치
+- (1) Pangolin
+```
+# 1. OpenGL
+sudo apt install libgl1-mesa-dev
+
+# 2. Glew
+sudo apt install libglew-dev
+
+# 3. CMake
+sudo apt install cmake
+
+# 4. python
+sudo apt install libpython2.7-dev
+sudo apt-get install python-pip
+sudo python -mpip install numpy pyopengl Pillow pybind11
+
+# 5. wayland
+sudo apt install pkg-config
+sudo apt install libegl1-mesa-dev libwayland-dev libxkbcommon-dev wayland-protocols
+
+# 6. PCL For ROS
+sudo apt-get install libopenni2-dev
+sudo apt-get install ros-melodic-pcl-ros
+```
+- building
+```
+git clone https://github.com/stevenlovegrove/Pangolin.git
+cd Pangolin
+mkdir build
+cd build
+cmake ..
+cmake --build .
+```
+
+- Eigen3
+```
+# Eigen 3
+sudo apt install libeigen3-dev
+```
+
+- (2) Building ORB-SLAM2 Library and Examples
+```
+# clone the repository
+git clone https://github.com/raulmur/ORB_SLAM2.git ORB_SLAM2
+
+# build
+cd ORB_SLAM2
+chmod +x build.sh
+./build.sh
+```
+사진
+
+- 위와 같은 오류가 뜬다.
+
+- 해결방법 - 1 
+- ~/ORB_SLAM2/build.sh
+```
+echo "Configuring and building Thirdparty/DBoW2 ..."
+
+cd Thirdparty/DBoW2
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make -j2
+
+cd ../../g2o
+
+echo "Configuring and building Thirdparty/g2o ..."
+
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make -j2
+
+cd ../../../
+
+echo "Uncompress vocabulary ..."
+
+cd Vocabulary
+tar -xf ORBvoc.txt.tar.gz
+cd ..
+
+echo "Configuring and building ORB_SLAM2 ..."
+
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make -j2
+```
+- make -j 를 make -j2로 변경한다.
+
+- 해결방법 - 2
+- ~/ORB_SLAM2/include/System.h
+```
+#include <unistd.h> 
+```
+- 위의 내용을 추가한다.
+
+- (3) Building ORB-SLAM2 Library and Examples (ROS)
+
+```
+export ROS_PACKAGE_PATH=${ROS_PACKAGE_PATH}:~/ORB_SLAM2/Examples/ROS
+
+chmod +x build_ros.sh
+./build_ros.sh
+```
+사진
+- 해결방법 - 1
+-  ~/ORB_SLAM2/build_ros.sh
+```
+echo "Building ROS nodes"
+
+cd Examples/ROS/ORB_SLAM2
+mkdir build
+cd build
+cmake .. -DROS_BUILD_TYPE=Release
+make -j2
+```
+- line 7 에서 make -j를 make -j2로 변경한다.
+
+- 해결방법 - 2
+-  ~/ORB_SLAM2/Examples/ROS/ORB_SLAM2/CMakeLists.txt
+사진
+- 위의 초록색 사진의 해당 행을 추가한다.
 
 
+- (4) ROS Examples (ORB SLAM2 : RGB-D)
+- ~/ORB_SLAM2/Examples/ROS/ORB_SLAM2/src/ros_rgbd.cc 수정
+```
+# ros_rgbd.cc
+
+# line 68
+message_filters::Subscriber<sensor_msgs::Image> rgb_sub(nh, "/d435/rgb/image_raw", 1);
+
+# line 69
+message_filters::Subscriber<sensor_msgs::Image> depth_sub(nh, "/d435/depth/image_rect_raw", 1);
+```
+- 수정한 후에 재빌드 한다.
+```
+export ROS_PACKAGE_PATH=${ROS_PACKAGE_PATH}:~/ORB_SLAM2/Examples/ROS
+
+chmod +x build_ros.sh
+./build_ros.sh
+```
+
+- 실행
+```
+# 가제보 실행
+roslaunch px4 mavros_posix_sitl.launch
+```
+
+```
+# rviz 실행
+roslaunch f450 display.launch
+```
+
+```
+# orb-slam2 실행
+cd ~/ORB_SLAM2
+
+export ROS_PACKAGE_PATH=${ROS_PACKAGE_PATH}:~/ORB_SLAM2/Examples/ROS
+
+rosrun ORB_SLAM2 RGBD ~/ORB_SLAM2/Vocabulary/ORBvoc.txt ~/ORB_SLAM2/Examples/RGB-D/TUM1.yaml
+```
