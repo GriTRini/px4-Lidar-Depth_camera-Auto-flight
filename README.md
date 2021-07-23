@@ -1,83 +1,5 @@
 # px4-project
-## 1 .opencv 설치
-- ros를 설치하기 전에 먼저 opencv를 설치해야 한다.
-- (1) 업데이트
-```
-sudo apt-get update
-sudo apt-get upgrade
-```
-- (2) 필요한 라이브러리 설치
-```
-sudo apt-get install python2.7-dev python3-dev python-numpy python3-numpy
-
-sudo apt-get install libjpeg-dev libpng-dev libtiff-dev
-sudo apt-get install libavcodec-dev libavformat-dev libswscale-dev libv4l-dev v4l-utils 
-sudo apt-get install libxvidcore-dev libx264-dev libxine2-dev
-sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
-sudo apt-get install libgtk-3-dev
-sudo apt-get install mesa-utils libgl1-mesa-dri libgtkgl2.0-dev libgtkglext1-dev
-sudo apt-get install libatlas-base-dev gfortran libeigen3-dev
-```
-- (3) opencv 설치
-```
-mkdir opencv
-cd opencv
-wget -O opencv.zip https://github.com/opencv/opencv/archive/3.4.0.zip
-wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/3.4.0.zip
-
-unzip opencv.zip
-unzip opencv_contrib.zip
-
-cd opencv-3.4.0
-mkdir build
-cd build
-```
-- (4) opencv 빌드
-```
-cmake -D CMAKE_BUILD_TYPE=RELEASE \
--D CMAKE_INSTALL_PREFIX=/usr/local \
--D WITH_TBB=OFF \
--D WITH_IPP=OFF \
--D WITH_1394=OFF \
--D BUILD_WITH_DEBUG_INFO=OFF \
--D BUILD_DOCS=OFF \
--D INSTALL_C_EXAMPLES=ON \
--D INSTALL_PYTHON_EXAMPLES=ON \
--D BUILD_EXAMPLES=OFF \
--D BUILD_TESTS=OFF \
--D BUILD_PERF_TESTS=OFF \
--D WITH_QT=OFF \
--D WITH_GTK=ON \
--D WITH_OPENGL=ON \
--D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib-3.4.0/modules \
--D WITH_V4L=ON  \
--D WITH_FFMPEG=ON \
--D WITH_XINE=ON \
--D BUILD_NEW_PYTHON_SUPPORT=ON \
--D PYTHON2_INCLUDE_DIR=/usr/include/python2.7 \
--D PYTHON2_NUMPY_INCLUDE_DIRS=/usr/lib/python2.7/dist-packages/numpy/core/include/ \
--D PYTHON2_PACKAGES_PATH=/usr/lib/python2.7/dist-packages \
--D PYTHON2_LIBRARY=/usr/lib/x86_64-linux-gnu/libpython2.7.so \
--D PYTHON3_INCLUDE_DIR=/usr/include/python3.6m \
--D PYTHON3_NUMPY_INCLUDE_DIRS=/usr/lib/python3/dist-packages/numpy/core/include/  \
--D PYTHON3_PACKAGES_PATH=/usr/lib/python3/dist-packages \
--D PYTHON3_LIBRARY=/usr/lib/x86_64-linux-gnu/libpython3.6m.so \
-../
-```
-```
-#방열판이 있을경우
-make -j4
-#방열판이 없을경우
-make -j2
-```
-- (5) opencv 컴파일
-```
-sudo make install
-sudo sh -c 'echo '/usr/local/lib' > /etc/ld.so.conf.d/opencv.conf'
-sudo ldconfig
-```
-
-## 2. px4 파일 설치
+## 1. px4 파일 설치
 - 밑에 홈페이지에서 받으면 된다.  
 
 홈페이지는 https://docs.px4.io/master/en/dev_setup/dev_env_linux_ubuntu.html#gazebo-jmavsim-and-nuttx-pixhawk-targets 이다.
@@ -97,7 +19,7 @@ git clone https://github.com/PX4/PX4-Autopilot.git --recursive
 bash ./PX4-Autopilot/Tools/setup/ubuntu.sh
 ```
 
-##2. ros/gazebo 설치
+## 2. ros/gazebo 설치
 - 해당 명령어를 입력해야 나중에 catkin build가 가능
 - ros홈페이지에서 설치하는 방식대로 하면 catkin build가 되지 않음 
 - ubuntu 18.04이며 melodic 설치이다.
@@ -153,20 +75,20 @@ LD_LIBRARY_PATH /home/jeong/catkin_ws/devel/lib:/opt/ros/melodic/lib:/home/jeong
 ```
 
 
-## 5. github에서 해당 프레임 가지고 오기
+## 5. github에서 사용할 custon_f450 프레임
 - home 안에 설치한다.
 ```
-https://github.com/GriTRini/px4-project.git
+git clone https://github.com/GriTRini/px4-project.git
 ```
-- 안에 있는 px4-quadrotor-HW-parts-main 파일을 home밖으로 꺼낸다.
-
-- 꺼낸후에 밑의 명령어를 실행한다.
+- 안에 있는 px4-quadrotor-HW-parts-main 파일로 들어간다.
 ```
-cd px4-quadrotor-HW-parts-main/
+cd ~/px4-project/px4-quadrotor-HW-parts-main/
 ```
+- px4-Autopilot model 안에 custom_f450을 넣는다.
 ```
 cp -r custom_f450/ ~/PX4-Autopilot/Tools/sitl_gazebo/models/
 ```
+- 1026_custom_f450 파일을 해당위치에 넣는다.
 ```
 cp 1026_custom_f450 ~/PX4-Autopilot/ROMFS/px4fmu_common/init.d-posix/airframes/
 ```
@@ -202,9 +124,36 @@ roslaunch px4 mavros_posix_sitl.launch
 - 저는 해당 오류가 떠서 .ros파일안 경로에 들어가서 처음에 복사 붙여넣기한 1026_custom_f450파일을 airframe 파일안에 넣었다.
 - 그리고 나서 다시 실행하니 gazebo에서 실행이 되었다.
 
+## 6. orb_slam2 설치
+- rosdep 설치
+```
+sudo rosdep init
+rosdep update
+```
+- Eigen3 설치
+```
+sudo apt install libeigen3-dev
+```
+- 먼저 위에 git에서 받은 파일중에 orb_slam_2_ros를 catkin_ws/src로 옮긴다.
+```
+cp -r px4-project/orb_slam_2_ros/ ~/catkin_ws/src
+```
+- launch 실행 파일 수정
+```
+cd catkin_ws/src/orb_slam_2_ros/ros/launch/ && gedit orb_slam2_d435_rgbd.launch
+```
+- line 5, 6 수정
+![스크린샷, 2021-07-23 10-32-40](https://user-images.githubusercontent.com/43773374/126727994-3c25a017-12c8-48c2-924f-b8ec5dfe5e4a.png)
+- line5 는 to에 /d435/rgb/image_raw
+- line6 는 to에 /d435/depth/image_rect_raw
+
+- build
+```
+cd ~/catkin_ws && catkin build
+```
 
 
-## 6. qgroundcontrol을 설치한다.
+## 7. qgroundcontrol을 설치한다.
 
 - 해당 홈페이지에서 GCS를 설치한다.
 ![Screenshot from 2021-07-19 09-16-07](https://user-images.githubusercontent.com/43773374/126086709-6e422694-1f0d-4144-8ef1-8e224b7d0773.png)
@@ -214,7 +163,7 @@ https://docs.qgroundcontrol.com/master/en/getting_started/download_and_install.h
 - 
 ![Screenshot from 2021-07-19 09-18-26](https://user-images.githubusercontent.com/43773374/126086777-e09dbb74-f5f2-4b72-a25f-bb4c631d2580.png)
 
-## 7. 다운받은 custom_f450 파일 rviz에서 수정하기
+## 8. 다운받은 custom_f450 파일 rviz
 
 ```
 cd px4-quadrotor-HW-parts-main/
@@ -268,31 +217,6 @@ sudo apt install ros-<your_ros_version>-joint-state-publisher-gui
  - 
  ![Screenshot from 2021-07-17 18-38-39](https://user-images.githubusercontent.com/43773374/126032892-b5fc2d74-c9f6-4fb7-9874-416852e96e14.png)
  
-## 8. 카메라 축 변경
-- 먼저 카메라 링크를 수정해야 한다.
-```
-cd ~/PX4-Autopilot/Tools/sitl_gazebo/models/custom_f450 && gedit custom_f450.sdf
-```
-![Screenshot from 2021-07-19 17-25-22](https://user-images.githubusercontent.com/43773374/126128406-f653a3b0-af14-442c-88d2-d5b3ec20b9a9.png)
-
-- <frameName>camera_link</frameName>를 다음과 처럼 <frameName>d435_link</frameName> 바꿔준다.
-
-- 카메라 축을 변경하기 위해서는 joint 된 축을 변경해야 한다.
-```
-cd ~/catkin_ws/src/f450/urdf && gedit f450.urdf
-```
-![Screenshot from 2021-07-19 17-20-54](https://user-images.githubusercontent.com/43773374/126128383-0bc97acb-3453-432e-96ec-f191b6aadf23.png)
-
-- 실행하면 이러한 창이 뜬다.
-- 카메라와 base_link를 서로 joint한 곳을 찾아서 축을 수정한다.
-- 처음에는 000 으로 되어있다.
-
-![Screenshot from 2021-07-19 17-22-22](https://user-images.githubusercontent.com/43773374/126128395-00ad19e9-f06e-4cde-a74f-a67c4b276007.png)
-
-
-- 해당 부분을 위의 사진중에서 rpy="-1.5707 0 -1.5707" 로 수정한다.
-
-
 
 ## 9. 실행
 
@@ -303,175 +227,4 @@ roslaunch px4 mavros_posix_sitl.launch
 
 ```
 roslaunch px4 display.launch
-```
-
-## 10. orb slam2 설치
-- (1) Pangolin
-```
-# 1. OpenGL
-sudo apt install libgl1-mesa-dev
-
-# 2. Glew
-sudo apt install libglew-dev
-
-# 3. CMake
-sudo apt install cmake
-
-# 4. python
-sudo apt install libpython2.7-dev
-sudo apt-get install python-pip
-sudo python -mpip install numpy pyopengl Pillow pybind11
-
-# 5. wayland
-sudo apt install pkg-config
-sudo apt install libegl1-mesa-dev libwayland-dev libxkbcommon-dev wayland-protocols
-
-# 6. PCL For ROS
-sudo apt-get install libopenni2-dev
-sudo apt-get install ros-melodic-pcl-ros
-```
-- building
-```
-git clone https://github.com/stevenlovegrove/Pangolin.git
-cd Pangolin
-mkdir build
-cd build
-cmake ..
-cmake --build .
-```
-
-- Eigen3
-```
-# Eigen 3
-sudo apt install libeigen3-dev
-```
-
-- (2) Building ORB-SLAM2 Library and Examples
-```
-# clone the repository
-git clone https://github.com/raulmur/ORB_SLAM2.git ORB_SLAM2
-
-# build
-cd ORB_SLAM2
-chmod +x build.sh
-./build.sh
-```
-![다운로드](https://user-images.githubusercontent.com/43773374/126584130-eff83378-e971-4b04-92aa-64d2deafb93b.png)
-
-
-- 위와 같은 오류가 뜬다.
-
-- 해결방법 - 1 
-- ~/ORB_SLAM2/build.sh
-```
-echo "Configuring and building Thirdparty/DBoW2 ..."
-
-cd Thirdparty/DBoW2
-mkdir build
-cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j2
-
-cd ../../g2o
-
-echo "Configuring and building Thirdparty/g2o ..."
-
-mkdir build
-cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j2
-
-cd ../../../
-
-echo "Uncompress vocabulary ..."
-
-cd Vocabulary
-tar -xf ORBvoc.txt.tar.gz
-cd ..
-
-echo "Configuring and building ORB_SLAM2 ..."
-
-mkdir build
-cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j2
-```
-- make -j 를 make -j2로 변경한다.
-
-- 해결방법 - 2
-- ~/ORB_SLAM2/include/System.h
-```
-#include <unistd.h> 
-```
-- 위의 내용을 추가한다.
-
-- (3) Building ORB-SLAM2 Library and Examples (ROS)
-
-```
-export ROS_PACKAGE_PATH=${ROS_PACKAGE_PATH}:~/ORB_SLAM2/Examples/ROS
-
-chmod +x build_ros.sh
-./build_ros.sh
-```
-![다운로드 (1)](https://user-images.githubusercontent.com/43773374/126584120-7a2c912f-9923-4b54-b8c1-9105bb87d0b8.png)
-
-
-- 해결방법 - 1
--  ~/ORB_SLAM2/build_ros.sh
-```
-echo "Building ROS nodes"
-
-cd Examples/ROS/ORB_SLAM2
-mkdir build
-cd build
-cmake .. -DROS_BUILD_TYPE=Release
-make -j2
-```
-- line 7 에서 make -j를 make -j2로 변경한다.
-
-- 해결방법 - 2
--  ~/ORB_SLAM2/Examples/ROS/ORB_SLAM2/CMakeLists.txt
-![다운로드 (2)](https://user-images.githubusercontent.com/43773374/126584111-76ff1759-5bca-4c3b-b20a-97f3d6dedfee.png)
-
-
-- 위의 초록색 사진의 해당 행을 추가한다.
-
-
-- (4) ROS Examples (ORB SLAM2 : RGB-D)
-- ~/ORB_SLAM2/Examples/ROS/ORB_SLAM2/src/ros_rgbd.cc 수정
-```
-# ros_rgbd.cc
-
-# line 68
-message_filters::Subscriber<sensor_msgs::Image> rgb_sub(nh, "/d435/rgb/image_raw", 1);
-
-# line 69
-message_filters::Subscriber<sensor_msgs::Image> depth_sub(nh, "/d435/depth/image_rect_raw", 1);
-```
-- 수정한 후에 재빌드 한다.
-```
-export ROS_PACKAGE_PATH=${ROS_PACKAGE_PATH}:~/ORB_SLAM2/Examples/ROS
-
-chmod +x build_ros.sh
-./build_ros.sh
-```
-
-- 실행
-```
-# 가제보 실행
-roslaunch px4 mavros_posix_sitl.launch
-```
-
-```
-# rviz 실행
-roslaunch f450 display.launch
-```
-
-```
-# orb-slam2 실행
-cd ~/ORB_SLAM2
-
-export ROS_PACKAGE_PATH=${ROS_PACKAGE_PATH}:~/ORB_SLAM2/Examples/ROS
-
-rosrun ORB_SLAM2 RGBD ~/ORB_SLAM2/Vocabulary/ORBvoc.txt ~/ORB_SLAM2/Examples/RGB-D/TUM1.yaml
 ```
