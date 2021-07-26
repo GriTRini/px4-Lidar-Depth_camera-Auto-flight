@@ -261,4 +261,26 @@ cd ~/catkin_ws && catkin build
 ```
 export QT_X11_NO_MITSHM=1
 ```
+- local_planner_stereo: simulates a vehicle with a stereo camera that uses OpenCV's block matching algorithm (SGBM by default) to generate depth information
+```
+roslaunch local_planner local_planner_stereo.launch
+```
+- local_planner_depth_camera: simulates vehicle with one forward-facing kinect sensor
+```
+roslaunch local_planner local_planner_depth-camera.launch
+```
+- local_planner_sitl_3cam: simulates vehicle with 3 kinect sensors (left, right, front)
+```
+roslaunch local_planner local_planner_sitl_3cam.launch
+```
+- Global Planner (advanced, not flight tested) This section shows how to start the global_planner and use it for avoidance in offboard mode.
+```
+roslaunch global_planner global_planner_stereo.launch
+```
 
+- 수정없이 그냥 하게 된다면 gazebo가 실행되지 않고 rviz만 실행이 된다. gazebo도 실행을 시키려면 밑의 사진대로 하면 된다.
+```
+cd ~/catkin_ws/src/avoidance/avoidance/launch && gedit avoidance_sitl_mavros.launch
+```
+![스크린샷, 2021-07-26 16-40-05](https://user-images.githubusercontent.com/43773374/126951252-5a3446d5-c36e-4203-85d9-086fc38e92d4.png)
+- line 3에 있는 false를 true로 바꾸게 되면 gazebo
