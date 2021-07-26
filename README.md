@@ -238,7 +238,27 @@ roslaunch px4 mavros_posix_sitl.launch
 ```
 roslaunch px4 display.launch
 ```
-- 
 ```
+- slam2 실행
 roslaunch orb_slam2_ros orb_slam2_d435_rgbd.launch
 ```
+
+## 10. px4-avoidance 설치
+- Install avoidance module dependencies (pointcloud library and octomap).
+```
+sudo apt install libpcl1 ros-melodic-octomap-*
+```
+- catkin/src 안에 avoidance 파일 다운로드
+```
+cd ~/catkin_ws/src
+git clone https://github.com/PX4/avoidance.git
+```
+- catkin build
+```
+cd ~/catkin_ws && catkin build
+```
+- Qt-related errors 예방하기 위해서 .bashrc 에 넣기
+```
+export QT_X11_NO_MITSHM=1
+```
+
