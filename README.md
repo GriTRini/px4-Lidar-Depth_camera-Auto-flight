@@ -265,18 +265,31 @@ export QT_X11_NO_MITSHM=1
 ```
 roslaunch local_planner local_planner_stereo.launch
 ```
+![스크린샷, 2021-07-26 16-41-42](https://user-images.githubusercontent.com/43773374/126951496-ee0ee9bd-b874-4190-8c4c-c807cf02c431.png)
+
 - local_planner_depth_camera: simulates vehicle with one forward-facing kinect sensor
 ```
 roslaunch local_planner local_planner_depth-camera.launch
 ```
+![스크린샷, 2021-07-26 16-42-42](https://user-images.githubusercontent.com/43773374/126951634-954926f2-fdac-4118-98e6-8c10b4626664.png)
+
 - local_planner_sitl_3cam: simulates vehicle with 3 kinect sensors (left, right, front)
 ```
 roslaunch local_planner local_planner_sitl_3cam.launch
 ```
+![스크린샷, 2021-07-26 16-43-33](https://user-images.githubusercontent.com/43773374/126951792-e2aa4f49-c6fb-4e78-84f0-7be1f9aac8dc.png)
+
 - Global Planner (advanced, not flight tested) This section shows how to start the global_planner and use it for avoidance in offboard mode.
 ```
 roslaunch global_planner global_planner_stereo.launch
 ```
+![스크린샷, 2021-07-26 16-44-22](https://user-images.githubusercontent.com/43773374/126951881-585879f5-6ec2-4861-a83e-4b7a101d312d.png)
+
+- 해당 코드를 실행하게 되면 왼쪽 오른쪽 카메라가 보여지고 전면 카메라가 보이게 된다.
+```
+rosrun image_view stereo_view stereo:=/stereo image:=image_rect_color
+```
+![스크린샷, 2021-07-26 16-45-13](https://user-images.githubusercontent.com/43773374/126952151-1336b3bc-328e-40a3-bb67-43cb96f5f4b4.png)
 
 - 수정없이 그냥 하게 된다면 gazebo가 실행되지 않고 rviz만 실행이 된다. gazebo도 실행을 시키려면 밑의 사진대로 하면 된다.
 ```
