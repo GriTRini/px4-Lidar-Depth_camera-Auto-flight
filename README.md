@@ -262,3 +262,5 @@ cd ~/catkin_ws && catkin build
 export QT_X11_NO_MITSHM=1
 ```
 
+
+
