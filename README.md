@@ -167,6 +167,10 @@ https://docs.qgroundcontrol.com/master/en/getting_started/download_and_install.h
 ![Screenshot from 2021-07-19 09-18-26](https://user-images.githubusercontent.com/43773374/126086777-e09dbb74-f5f2-4b72-a25f-bb4c631d2580.png)
 
 ## 8. 다운받은 custom_f450 파일 rviz
+- px4_config.yaml 에서 line 71 인 #local_position 부분에 send 의 value 값을 false 에서 true 로 바꿔주면 map 에 base_link 가 정상적으로 연결된다.
+```
+cd ~/catkin_ws/src/mavros/mavros/launch && gedit px4_config.yaml
+```
 
 ```
 cd px4-quadrotor-HW-parts-main/
@@ -261,6 +265,606 @@ cd ~/catkin_ws && catkin build
 ```
 export QT_X11_NO_MITSHM=1
 ```
+- local_planner_stereo: simulates a vehicle with a stereo camera that uses OpenCV's block matching algorithm (SGBM by default) to generate depth information
+```
+roslaunch local_planner local_planner_stereo.launch
+```
+![스크린샷, 2021-07-26 16-41-42](https://user-images.githubusercontent.com/43773374/126951496-ee0ee9bd-b874-4190-8c4c-c807cf02c431.png)
+
+- local_planner_depth_camera: simulates vehicle with one forward-facing kinect sensor
+```
+roslaunch local_planner local_planner_depth-camera.launch
+```
+![스크린샷, 2021-07-26 16-42-42](https://user-images.githubusercontent.com/43773374/126951634-954926f2-fdac-4118-98e6-8c10b4626664.png)
+
+- local_planner_sitl_3cam: simulates vehicle with 3 kinect sensors (left, right, front)
+```
+roslaunch local_planner local_planner_sitl_3cam.launch
+```
+![스크린샷, 2021-07-26 16-43-33](https://user-images.githubusercontent.com/43773374/126951792-e2aa4f49-c6fb-4e78-84f0-7be1f9aac8dc.png)
+
+- Global Planner (advanced, not flight tested) This section shows how to start the global_planner and use it for avoidance in offboard mode.
+```
+roslaunch global_planner global_planner_stereo.launch
+```
+![스크린샷, 2021-07-26 16-44-22](https://user-images.githubusercontent.com/43773374/126951881-585879f5-6ec2-4861-a83e-4b7a101d312d.png)
+
+- 해당 코드를 실행하게 되면 왼쪽 오른쪽 카메라가 보여지고 전면 카메라가 보이게 된다.
+```
+rosrun image_view stereo_view stereo:=/stereo image:=image_rect_color
+```
+![스크린샷, 2021-07-26 16-45-13](https://user-images.githubusercontent.com/43773374/126952151-1336b3bc-328e-40a3-bb67-43cb96f5f4b4.png)
+
+- 수정없이 그냥 하게 된다면 gazebo가 실행되지 않고 rviz만 실행이 된다. gazebo도 실행을 시키려면 밑의 사진대로 하면 된다.
+```
+cd ~/catkin_ws/src/avoidance/avoidance/launch && gedit avoidance_sitl_mavros.launch
+```
+![스크린샷, 2021-07-26 16-40-05](https://user-images.githubusercontent.com/43773374/126951252-5a3446d5-c36e-4203-85d9-086fc38e92d4.png)
+- line 3에 있는 false를 true로 바꾸게 되면 gazebo가 화면에 출력된다.
+
+## 11. 2d laser slam
+- 먼저 lidar가 달린 드론을 제작해야 한다.
+- 본인은 px4내에 있는 iris_foggy_lidar를 가지고 만들었다.
+- 먼저 xtdrone에 있는 hokuyo lidar를 px4 models 안으로 옮긴다.
+- 그리고 나서 models 안에 있는 iris_foggy_lidar.sdf 파일을 수정한다.
+```
+cd ~/PX4-Autopilot/Tools/sitl_gazebo/models/iris_foggy_lidar && gedit iris.foggy_lidar.sdf
+```
+- 밑에 있는 코드를 복사후 붙여 넣는다.
+```
+<?xml version="1.0" ?>
+<sdf version='1.5'>
+  <model name='iris_foggy_lidar'>
+
+    <include>
+      <uri>model://iris</uri>
+    </include> 
+<!--
+    <include>
+      <uri>model://foggy_lidar</uri>
+      <pose>0 0 0.1 0 1.571 0</pose>
+    </include>
+    <joint name="foggy_lidar_joint" type="revolute">
+      <parent>iris::base_link</parent>
+      <child>foggy_lidar::link</child>
+      <pose>0 0 0.1 0 1.571 0</pose>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <upper>0</upper>
+          <lower>0</lower>
+        </limit>
+      </axis>
+    </joint>
+-->
+<!-- For Hokuyo Lidar Payload -->
+    <include>
+        <uri>model://hokuyo_lidar</uri>
+        <pose>0 0 0.1 0 0 0</pose>
+      </include>
+    <joint name="lidar_joint" type="fixed">
+      <parent>iris::base_link</parent>
+      <child>hokuyo_lidar::link</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <upper>0</upper>
+          <lower>0</lower>
+        </limit>
+      </axis>
+    </joint>
+  </model>
+</sdf>
+<!-- vim: set noet fenc=utf-8 ff=unix sts=0 sw=4 ts=4 : -->
+```
+- 그다음에 실행할 mavros_posix_sitl.launch 파일을 수정해야 한다.
+```
+cd ~/PX4-Autopilot/launch && gedit mavros_posix_sitl.launch
+```
+- line 14에서 default를 iris_foggy_lidar로 수정한다.
+- line 15에서 default를 indoor3.world로 수정한다.
+```
+사진
+```
 
 
+- 먼저 pkg를 다운로드 한다.
+```
+sudo apt install ros-<your_ros_version>-laser-scan-matcher
+```
 
+- 해당 패키지를 받으면 opt파일 안에 존재한다.
+```
+cd /opt/ros/melodic/share/laser_scan_matcher/demo
+```
+- 폴더 안에 있는 파일은 읽기 전용으로 밖에 열리지 않아서 명령어를 입력하여 파일을 열어야 한다.
+```
+sudo gedit demo.launch
+```
+- demo.launch 파일을 연다.
+- 해당 파일은 laser slam을 작동 시키기 위한 launch 파일이다.
+- 밑에 있는 내용을 복사해서 붙여넣기 하면 된다.
+```
+<!--
+Example launch file: launches the scan matcher with pre-recorded data
+-->
+
+<launch>
+  <arg name="IS_TWISTSTAMPED" default="true" />
+  <arg name="use_rviz" default="true" />
+  <arg name="publish_covariance" default="false"/>
+
+  #### publish an example base_link -> laser transform ###########
+  <node pkg="tf" type="static_transform_publisher" name="iris_base_link_to_laser" args="0.0 0.0 0.1 0.0 0.0 0.0 /iris/base_link /iris_foggy_lidar/laser_2d 40" />
+  #### set up data playback from bag #############################
+  
+  <param name="/use_sim_time" value="true"/>
+  <param name="/stamped_vel" value="$(arg IS_TWISTSTAMPED)"/>
+
+  <group if="$(arg use_rviz)">
+    <node pkg="rviz" type="rviz" name="rviz"
+          args="-d $(find laser_scan_matcher)/demo/demo.rviz"/>
+  </group>
+  #### start the laser scan_matcher ##############################
+
+  <group if="$(arg publish_covariance)">
+    <param name="laser_scan_matcher_node/do_compute_covariance" value="1"/>
+    <param name="laser_scan_matcher_node/publish_pose_with_covariance" value="true"/>
+    <param name="laser_scan_matcher_node/publish_pose_with_covariance_stamped" value="true"/>
+  </group>
+  <node pkg="laser_scan_matcher" type="laser_scan_matcher_node" name="laser_scan_matcher_node" output="screen">
+    <param name="fixed_frame" value = "odom"/>
+    <param name="base_frame" value = "iris/base_link"/>
+    <param name="max_iterations" value="10"/>
+    <param name="use_imu" value="false"/>
+    <param name="use_odom" value="false"/>
+    <remap from="scan" to="/iris_foggy_lidar/scan"/>
+    <remap from="pose2D" to="iris/pose2D"/>
+  </node>
+
+</launch>
+```
+- demo.rviz에는 밑에 내용을 붙여넣으면 된다.
+```
+sudo gedit demo.rviz
+```
+```
+Panels:
+  - Class: rviz/Displays
+    Help Height: 78
+    Name: Displays
+    Property Tree Widget:
+      Expanded:
+        - /Global Options1
+        - /Status1
+        - /Grid1
+        - /LaserScan1
+        - /TF1
+        - /TF1/Frames1
+      Splitter Ratio: 0.5
+    Tree Height: 434
+  - Class: rviz/Selection
+    Name: Selection
+  - Class: rviz/Tool Properties
+    Expanded:
+      - /2D Pose Estimate1
+      - /2D Nav Goal1
+      - /Publish Point1
+    Name: Tool Properties
+    Splitter Ratio: 0.588679
+  - Class: rviz/Views
+    Expanded:
+      - /Current View1
+    Name: Views
+    Splitter Ratio: 0.5
+  - Class: rviz/Time
+    Experimental: false
+    Name: Time
+    SyncMode: 0
+    SyncSource: LaserScan
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Alpha: 0.5
+      Cell Size: 1
+      Class: rviz/Grid
+      Color: 160; 160; 164
+      Enabled: true
+      Line Style:
+        Line Width: 0.03
+        Value: Lines
+      Name: Grid
+      Normal Cell Count: 0
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Plane: XY
+      Plane Cell Count: 10
+      Reference Frame: <Fixed Frame>
+      Value: true
+    - Alpha: 0.2
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/LaserScan
+      Color: 255; 0; 0
+      Color Transformer: FlatColor
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 0; 0
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: LaserScan
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.1
+      Style: Flat Squares
+      Topic: /iris_0/scan
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
+        base_link:
+          Value: true
+        laser:
+          Value: true
+        odom:
+          Value: true
+      Marker Scale: 3
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        odom:
+          base_link:
+            laser:
+              {}
+      Update Interval: 0
+      Value: true
+  Enabled: true
+  Global Options:
+    Background Color: 0; 0; 0
+    Fixed Frame: odom
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz/Interact
+      Hide Inactive Objects: true
+    - Class: rviz/MoveCamera
+    - Class: rviz/Select
+    - Class: rviz/FocusCamera
+    - Class: rviz/Measure
+    - Class: rviz/SetInitialPose
+      Topic: /initialpose
+    - Class: rviz/SetGoal
+      Topic: /move_base_simple/goal
+    - Class: rviz/PublishPoint
+      Single click: true
+      Topic: /clicked_point
+  Value: true
+  Views:
+    Current:
+      Angle: 0
+      Class: rviz/TopDownOrtho
+      Enable Stereo Rendering:
+        Stereo Eye Separation: 0.06
+        Stereo Focal Distance: 1
+        Swap Stereo Eyes: false
+        Value: false
+      Name: Current View
+      Near Clip Distance: 0.01
+      Scale: 150
+      Target Frame: <Fixed Frame>
+      Value: TopDownOrtho (rviz)
+      X: 0
+      Y: 0
+    Saved: ~
+Window Geometry:
+  Displays:
+    collapsed: false
+  Height: 721
+  Hide Left Dock: false
+  Hide Right Dock: false
+  QMainWindow State: 000000ff00000000fd00000004000000000000013c0000023dfc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005300fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c00610079007301000000360000023d000000b700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000010f0000023dfc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a0056006900650077007301000000360000023d0000009b00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004000000003efc0100000002fb0000000800540069006d00650100000000000004000000024500fffffffb0000000800540069006d00650100000000000004500000000000000000000001a90000023d00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Selection:
+    collapsed: false
+  Time:
+    collapsed: false
+  Tool Properties:
+    collapsed: false
+  Views:
+    collapsed: false
+  Width: 1024
+  X: -2
+  Y: -2
+  ```
+- mapping을 하기 위해서는 demo_gmapping.launch파일을 수정해야 합니다.
+```
+sudo gedit demo_gmapping.launch
+```
+```
+<!-- 
+Example launch file: uses laser_scan_matcher together with
+slam_gmapping 
+-->
+
+<launch>
+
+  <param name="/use_sim_time" value="true"/>
+
+#### publish an example base_link -> laser transform ###########
+  <node pkg="tf" type="static_transform_publisher" name="iris_base_link_to_laser" args="0.0 0.0 0.1 0.0 0.0 0.0 /iris/base_link /iris_foggy_lidar/laser_2d 40" />
+
+  #### start rviz ################################################
+
+  <node pkg="rviz" type="rviz" name="rviz" 
+    args="-d $(find laser_scan_matcher)/demo/demo_gmapping.rviz"/>
+
+  #### start the laser scan_matcher ##############################
+
+  <node pkg="laser_scan_matcher" type="laser_scan_matcher_node"
+    name="laser_scan_matcher_node" output="screen">
+    <param name="fixed_frame" value = "odom"/>
+    <param name="base_frame" value = "iris/base_link"/>
+    <param name="max_iterations" value="10"/>
+    <param name="use_imu" value="false"/>
+    <param name="use_odom" value="false"/>
+    <remap from="scan" to="/iris_foggy_lidar/scan"/>
+    <remap from="pose2D" to="iris/pose2D"/>
+  </node>
+
+  #### start gmapping ############################################
+
+  <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
+    <param name="base_frame" value='iris/base_link'/>
+    <param name="map_udpate_interval" value="1.0"/>
+    <param name="maxUrange" value="5.0"/>
+    <param name="sigma" value="0.1"/>
+    <param name="kernelSize" value="1"/>
+    <param name="lstep" value="0.15"/>
+    <param name="astep" value="0.15"/>
+    <param name="iterations" value="1"/>
+    <param name="lsigma" value="0.1"/>
+    <param name="ogain" value="3.0"/>
+    <param name="lskip" value="1"/>
+    <param name="srr" value="0.1"/>
+    <param name="srt" value="0.2"/>
+    <param name="str" value="0.1"/>
+    <param name="stt" value="0.2"/>
+    <param name="linearUpdate" value="1.0"/>
+    <param name="angularUpdate" value="0.5"/>
+    <param name="temporalUpdate" value="0.4"/>
+    <param name="resampleThreshold" value="0.5"/>
+    <param name="particles" value="10"/>
+    <param name="xmin" value="-5.0"/>
+    <param name="ymin" value="-5.0"/>
+    <param name="xmax" value="5.0"/>
+    <param name="ymax" value="5.0"/>
+    <param name="delta" value="0.02"/>
+    <param name="llsamplerange" value="0.01"/>
+    <param name="llsamplestep" value="0.05"/>
+    <param name="lasamplerange" value="0.05"/>
+    <param name="lasamplestep" value="0.05"/>
+    <remap from="scan" to="/iris_foggy_lidar/scan"/>
+    <remap from="pose2D" to="iris/pose2D"/>
+  </node>
+
+</launch>
+```
+- demo_gmapping.rviz 파일을 수정한다.
+```
+sudo gedit demo_gmapping.rviz
+```
+```
+Panels:
+  - Class: rviz/Displays
+    Help Height: 78
+    Name: Displays
+    Property Tree Widget:
+      Expanded:
+        - /Global Options1
+        - /Status1
+        - /Grid1
+        - /LaserScan1
+        - /TF1
+        - /TF1/Frames1
+        - /TF1/Frames1/odom1
+        - /Map1
+      Splitter Ratio: 0.5
+    Tree Height: 434
+  - Class: rviz/Selection
+    Name: Selection
+  - Class: rviz/Tool Properties
+    Expanded:
+      - /2D Pose Estimate1
+      - /2D Nav Goal1
+      - /Publish Point1
+    Name: Tool Properties
+    Splitter Ratio: 0.588679
+  - Class: rviz/Views
+    Expanded:
+      - /Current View1
+    Name: Views
+    Splitter Ratio: 0.5
+  - Class: rviz/Time
+    Experimental: false
+    Name: Time
+    SyncMode: 0
+    SyncSource: LaserScan
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Alpha: 0.5
+      Cell Size: 1
+      Class: rviz/Grid
+      Color: 160; 160; 164
+      Enabled: true
+      Line Style:
+        Line Width: 0.03
+        Value: Lines
+      Name: Grid
+      Normal Cell Count: 0
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Plane: XY
+      Plane Cell Count: 10
+      Reference Frame: <Fixed Frame>
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/LaserScan
+      Color: 255; 0; 0
+      Color Transformer: FlatColor
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 0; 0
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: LaserScan
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.1
+      Style: Flat Squares
+      Topic: /iris_0/scan
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
+        base_link:
+          Value: true
+        laser:
+          Value: true
+        map:
+          Value: true
+        odom:
+          Value: true
+      Marker Scale: 3
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        map:
+          odom:
+            base_link:
+              laser:
+                {}
+      Update Interval: 0
+      Value: true
+    - Alpha: 0.7
+      Class: rviz/Map
+      Color Scheme: map
+      Draw Behind: false
+      Enabled: true
+      Name: Map
+      Topic: /map
+      Value: true
+  Enabled: true
+  Global Options:
+    Background Color: 0; 0; 0
+    Fixed Frame: map
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz/Interact
+      Hide Inactive Objects: true
+    - Class: rviz/MoveCamera
+    - Class: rviz/Select
+    - Class: rviz/FocusCamera
+    - Class: rviz/Measure
+    - Class: rviz/SetInitialPose
+      Topic: /initialpose
+    - Class: rviz/SetGoal
+      Topic: /move_base_simple/goal
+    - Class: rviz/PublishPoint
+      Single click: true
+      Topic: /clicked_point
+  Value: true
+  Views:
+    Current:
+      Angle: 0
+      Class: rviz/TopDownOrtho
+      Enable Stereo Rendering:
+        Stereo Eye Separation: 0.06
+        Stereo Focal Distance: 1
+        Swap Stereo Eyes: false
+        Value: false
+      Name: Current View
+      Near Clip Distance: 0.01
+      Scale: 150
+      Target Frame: <Fixed Frame>
+      Value: TopDownOrtho (rviz)
+      X: 0
+      Y: 0
+    Saved: ~
+Window Geometry:
+  Displays:
+    collapsed: false
+  Height: 721
+  Hide Left Dock: false
+  Hide Right Dock: false
+  QMainWindow State: 000000ff00000000fd00000004000000000000013c0000023dfc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005300fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c00610079007301000000360000023d000000b700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000010f0000023dfc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a0056006900650077007301000000360000023d0000009b00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004000000003efc0100000002fb0000000800540069006d00650100000000000004000000024500fffffffb0000000800540069006d00650100000000000004500000000000000000000001a90000023d00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Selection:
+    collapsed: false
+  Time:
+    collapsed: false
+  Tool Properties:
+    collapsed: false
+  Views:
+    collapsed: false
+  Width: 1024
+  X: -2
+  Y: -2
+  ```
+  - 그리고 나서 roslaunch px4 mavros_posix_sitl.launch를 실행하면 gazebo가 열린다.
+  ```
+  roslaunch px4 mavros_posix_sitl.launch
+  ```
+  ```
+  12
+  ```
+  - 그리고나서 demo.launch를 실행시킨다.
+  ```
+  roslaunch laser_scan_matcher demo.launch
+  ```
+  ```
+  1
+  ```
+  - demo.launch를 종료하고 나서 demo_gmapping.launch를 실행한다.
+  ```
+  roslaunch laser_scan_matcher demo_gmapping.launch
+  ```
+  ```
+  12345
+  ```
+  
