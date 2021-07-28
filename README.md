@@ -364,7 +364,8 @@ cd ~/PX4-Autopilot/launch && gedit mavros_posix_sitl.launch
 - line 14에서 default를 iris_foggy_lidar로 수정한다.
 - line 15에서 default를 indoor3.world로 수정한다.
 ```
-사진
+![123](https://user-images.githubusercontent.com/43773374/127287599-f5decda6-da03-49d7-a493-af1c354306f7.png)
+
 ```
 
 
@@ -851,20 +852,23 @@ Window Geometry:
   roslaunch px4 mavros_posix_sitl.launch
   ```
   ```
-  12
+  ![12](https://user-images.githubusercontent.com/43773374/127287522-fdaf4f2a-ed12-482a-a795-46aeae6bacdf.png)
+
   ```
   - 그리고나서 demo.launch를 실행시킨다.
   ```
   roslaunch laser_scan_matcher demo.launch
   ```
   ```
-  1
+  ![1](https://user-images.githubusercontent.com/43773374/127287482-cbef3c0a-fe3e-4d15-9a8a-9c5b9d76bc1e.png)
+
   ```
   - demo.launch를 종료하고 나서 demo_gmapping.launch를 실행한다.
   ```
   roslaunch laser_scan_matcher demo_gmapping.launch
   ```
   ```
-  12345
+  ![12345](https://user-images.githubusercontent.com/43773374/127287500-2c5f8149-d783-465d-a921-bd6b4f9d55e2.png)
+
   ```
   
