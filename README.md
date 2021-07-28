@@ -167,6 +167,10 @@ https://docs.qgroundcontrol.com/master/en/getting_started/download_and_install.h
 ![Screenshot from 2021-07-19 09-18-26](https://user-images.githubusercontent.com/43773374/126086777-e09dbb74-f5f2-4b72-a25f-bb4c631d2580.png)
 
 ## 8. 다운받은 custom_f450 파일 rviz
+- px4_config.yaml 에서 line 71 인 #local_position 부분에 send 의 value 값을 false 에서 true 로 바꿔주면 map 에 base_link 가 정상적으로 연결된다.
+```
+cd ~/catkin_ws/src/mavros/mavros/launch && gedit px4_config.yaml
+```
 
 ```
 cd px4-quadrotor-HW-parts-main/
