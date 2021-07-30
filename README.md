@@ -246,8 +246,9 @@ roslaunch px4 display.launch
 - slam2 실행
 roslaunch orb_slam2_ros orb_slam2_d435_rgbd.launch
 ```
+## 10. orb_slam 설치
 
-## 10. px4-avoidance 설치
+## 11. px4-avoidance 설치
 - Install avoidance module dependencies (pointcloud library and octomap).
 ```
 sudo apt install libpcl1 ros-melodic-octomap-*
@@ -302,7 +303,7 @@ cd ~/catkin_ws/src/avoidance/avoidance/launch && gedit avoidance_sitl_mavros.lau
 ![스크린샷, 2021-07-26 16-40-05](https://user-images.githubusercontent.com/43773374/126951252-5a3446d5-c36e-4203-85d9-086fc38e92d4.png)
 - line 3에 있는 false를 true로 바꾸게 되면 gazebo가 화면에 출력된다.
 
-## 11. 2d laser slam
+## 12. 2d laser slam
 - 먼저 lidar가 달린 드론을 제작해야 한다.
 - 본인은 px4내에 있는 iris_foggy_lidar를 가지고 만들었다.
 - 먼저 xtdrone에 있는 hokuyo lidar를 px4 models 안으로 옮긴다.
@@ -311,7 +312,7 @@ cd ~/catkin_ws/src/avoidance/avoidance/launch && gedit avoidance_sitl_mavros.lau
 cd ~/PX4-Autopilot/Tools/sitl_gazebo/models/iris_foggy_lidar && gedit iris.foggy_lidar.sdf
 ```
 - 밑에 있는 코드를 복사후 붙여 넣는다.
-```
+```html
 <?xml version="1.0" ?>
 <sdf version='1.5'>
   <model name='iris_foggy_lidar'>
@@ -364,7 +365,8 @@ cd ~/PX4-Autopilot/launch && gedit mavros_posix_sitl.launch
 - line 14에서 default를 iris_foggy_lidar로 수정한다.
 - line 15에서 default를 indoor3.world로 수정한다.
 ```
-사진
+![123](https://user-images.githubusercontent.com/43773374/127287599-f5decda6-da03-49d7-a493-af1c354306f7.png)
+
 ```
 
 
@@ -384,7 +386,7 @@ sudo gedit demo.launch
 - demo.launch 파일을 연다.
 - 해당 파일은 laser slam을 작동 시키기 위한 launch 파일이다.
 - 밑에 있는 내용을 복사해서 붙여넣기 하면 된다.
-```
+```html
 <!--
 Example launch file: launches the scan matcher with pre-recorded data
 -->
@@ -428,7 +430,7 @@ Example launch file: launches the scan matcher with pre-recorded data
 ```
 sudo gedit demo.rviz
 ```
-```
+```html
 Panels:
   - Class: rviz/Displays
     Help Height: 78
@@ -596,7 +598,7 @@ Window Geometry:
 ```
 sudo gedit demo_gmapping.launch
 ```
-```
+```html
 <!-- 
 Example launch file: uses laser_scan_matcher together with
 slam_gmapping 
@@ -669,7 +671,7 @@ slam_gmapping
 ```
 sudo gedit demo_gmapping.rviz
 ```
-```
+```html
 Panels:
   - Class: rviz/Displays
     Help Height: 78
@@ -792,7 +794,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 0; 0; 0
-    Fixed Frame: map
+    Fixed Frame: odom
     Frame Rate: 30
   Name: root
   Tools:
@@ -850,21 +852,108 @@ Window Geometry:
   ```
   roslaunch px4 mavros_posix_sitl.launch
   ```
-  ```
-  12
-  ```
+
+  ![12](https://user-images.githubusercontent.com/43773374/127287522-fdaf4f2a-ed12-482a-a795-46aeae6bacdf.png)
+
+
   - 그리고나서 demo.launch를 실행시킨다.
   ```
   roslaunch laser_scan_matcher demo.launch
   ```
-  ```
-  1
-  ```
+
+  ![1](https://user-images.githubusercontent.com/43773374/127287482-cbef3c0a-fe3e-4d15-9a8a-9c5b9d76bc1e.png)
+
+
   - demo.launch를 종료하고 나서 demo_gmapping.launch를 실행한다.
   ```
   roslaunch laser_scan_matcher demo_gmapping.launch
   ```
+
+  ![12345](https://user-images.githubusercontent.com/43773374/127287500-2c5f8149-d783-465d-a921-bd6b4f9d55e2.png)
+
+## 11. optical flow senser와 stereo camera 추가하기
+  - iris_foggy_lidar에 opt_flow와 stereo camera를 추가한다.
   ```
-  12345
+  cd ~/PX4-Autopilot/Tools/sitl_gazebo/models/iris_foggy_lidar && gedit iris_foggy_lidar.sdf
+  ```
+  - 해당 파일을 열고 밑에 있는 코드를 추가한다.
+  ```html
+ <!--px4flow camera-->
+    <include>
+      <uri>model://px4flow</uri>
+      <pose>0.05 0 -0.05 0 0 0</pose>
+    </include>
+
+    <joint name="px4flow_joint" type="revolute">
+      <parent>iris::base_link</parent>
+      <child>px4flow::link</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <upper>0</upper>
+          <lower>0</lower>
+        </limit>
+      </axis>
+    </joint>
+
+<!--lidar-->
+    <include>
+      <uri>model://lidar</uri>
+      <pose>0 0 -0.05 0 0 0</pose>
+    </include>
+
+    <joint name="lidar_joint1" type="fixed">
+      <parent>iris::base_link</parent>
+      <child>lidar::link</child>
+    </joint>
+<!-- For Stereo camera -->
+    <include>
+          <uri>model://stereo_camera</uri>
+          <pose>0.1 0 0 0 0 0</pose>
+        </include>
+
+        <joint name="stereo_camera_joint" type="revolute">
+          <parent>iris::base_link</parent>
+          <child>stereo_camera::link</child>
+          <axis>
+            <xyz>0 0 1</xyz>
+            <limit>
+              <upper>0</upper>
+              <lower>0</lower>
+            </limit>
+          </axis>
+        </joint>
+   ```
+  ![00](https://user-images.githubusercontent.com/43773374/127591716-1ed012cb-c5d9-430a-86c3-a1d11c0528d2.png)
+  - demo.launch와 demo_gmapping.launch 파일을 수정한다.
+  ```
+  cd /opt/ros/melodic/share/laser_scan_matcher/demo && sudo gedit demo.launch
+  ```
+  ```
+  cd /opt/ros/melodic/share/laser_scan_matcher/demo && sudo gedit demo_gmapping.launch
   ```
   
+  - line 12와 line 13처럼 해당 코드를 입력한다.
+  ![0000](https://user-images.githubusercontent.com/43773374/127592796-f69d3201-fd26-4c5e-8107-00a7350398eb.png)
+![00000](https://user-images.githubusercontent.com/43773374/127592801-b5810ff2-c739-46f9-bf60-c0056bdec4d6.png)
+  ```
+  <node pkg="tf" type="static_transform_publisher" name="iris_base_link_to_flow" args="0.0 0.0 -0.05 0.0 0.0 0.0  base_link /px4flow 40" />
+  ```
+  ```
+  <node pkg="tf" type="static_transform_publisher" name="iris_base_link_to_camera" args="0.1 0.0 0.0 0.0 0.0 0.0 base_link /camera_link 40" />
+  ```
+  - 그리고 나서 다시 실행시킨후에 rostopic을 이용하여 opticalflow의 topic값이 출력되는지 확인한다.
+  ```
+  roslaunch px4 mavros_posix_sitl.launch
+  ```
+  ```
+  rostopic echo /mavros/px4flow/ground_distance
+  ```
+  ![000](https://user-images.githubusercontent.com/43773374/127592049-441f0aab-ea27-4a5c-b2e5-9b08a26c09ce.png)
+  - 그리고 나서 demo.launch 또는 demo_gmapping.launch를 실행시켜서 camera 가 잘 나오는지 확인한다.
+  ```
+  roslaunch laser_scan_matcher demo.launch
+  ```
+  ![Screenshot from 2021-07-30 11-58-00](https://user-images.githubusercontent.com/43773374/127593149-17f525e8-084e-42a0-afbc-ab965a4008d6.png)
+
+    
