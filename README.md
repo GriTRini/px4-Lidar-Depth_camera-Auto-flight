@@ -246,8 +246,9 @@ roslaunch px4 display.launch
 - slam2 실행
 roslaunch orb_slam2_ros orb_slam2_d435_rgbd.launch
 ```
+## 10. orb_slam 설치
 
-## 10. px4-avoidance 설치
+## 11. px4-avoidance 설치
 - Install avoidance module dependencies (pointcloud library and octomap).
 ```
 sudo apt install libpcl1 ros-melodic-octomap-*
@@ -302,7 +303,7 @@ cd ~/catkin_ws/src/avoidance/avoidance/launch && gedit avoidance_sitl_mavros.lau
 ![스크린샷, 2021-07-26 16-40-05](https://user-images.githubusercontent.com/43773374/126951252-5a3446d5-c36e-4203-85d9-086fc38e92d4.png)
 - line 3에 있는 false를 true로 바꾸게 되면 gazebo가 화면에 출력된다.
 
-## 11. 2d laser slam
+## 12. 2d laser slam
 - 먼저 lidar가 달린 드론을 제작해야 한다.
 - 본인은 px4내에 있는 iris_foggy_lidar를 가지고 만들었다.
 - 먼저 xtdrone에 있는 hokuyo lidar를 px4 models 안으로 옮긴다.
