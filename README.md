@@ -219,7 +219,7 @@ sudo apt install ros-<your_ros_version>-joint-state-publisher-gui
 - ubuntu 16.04 이면 kinetic, ubuntu 18.04 이면 melodic, ubuntu 20.04 이면 noetic이다.
 - map을 fix_frame으로 고정하고 드론을 띄우기 위해서는 send 의 value 값을 false 에서 true 로 바꿔주시면 map 에 base_link 가 정상적으로 연결됩니다.
 ```
-gedit mavros/mavros/launch/px4_config.yaml
+gedit ~/catkin_ws/src/mavros/mavros/launch/px4_config.yaml
 ```
 ![스크린샷, 2021-07-23 10-40-53](https://user-images.githubusercontent.com/43773374/126729782-35e69aff-1653-4fa0-946f-4826185130bf.png)
 
@@ -246,7 +246,7 @@ roslaunch px4 display.launch
 - slam2 실행
 roslaunch orb_slam2_ros orb_slam2_d435_rgbd.launch
 ```
-## 10. orb_slam 설치
+
 
 ## 11. px4-avoidance 설치
 - Install avoidance module dependencies (pointcloud library and octomap).
