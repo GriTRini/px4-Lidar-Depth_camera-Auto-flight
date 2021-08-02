@@ -125,6 +125,15 @@ roslaunch px4 mavros_posix_sitl.launch
 - 그리고 나서 다시 실행하니 gazebo에서 실행이 되었다.
 
 ## 6. orb_slam2 설치
+- 파일 설치
+```
+cd ~/catkin_ws/src && git clone https://github.com/appliedAI-Initiative/orb_slam_2_ros.git
+```
+- build
+```
+cd ~/catkin_ws && catkin build
+```
+
 - rosdep 설치
 ```
 sudo rosdep init
