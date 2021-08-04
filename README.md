@@ -127,8 +127,10 @@ roslaunch px4 mavros_posix_sitl.launch
 ## 6. orb_slam2 설치
 - 파일 설치
 ```
-cd ~/catkin_ws/src && git clone https://github.com/appliedAI-Initiative/orb_slam_2_ros.git
+https://drive.google.com/file/d/1_futH5n7Knyy_PfXcfwZ_K2-hsqBnwtR/view?usp=sharing
 ```
+- 압축파일을 catkin_ws/src 에 풀어야함
+
 - build
 ```
 cd ~/catkin_ws && catkin build
@@ -316,6 +318,15 @@ cd ~/catkin_ws/src/avoidance/avoidance/launch && gedit avoidance_sitl_mavros.lau
 - 먼저 lidar가 달린 드론을 제작해야 한다.
 - 본인은 px4내에 있는 iris_foggy_lidar를 가지고 만들었다.
 - 먼저 xtdrone에 있는 hokuyo lidar를 px4 models 안으로 옮긴다.
+- xtdrone 설치
+```
+git clone https://gitee.com/robin_shaun/XTDrone.git
+```
+- xt drone 안에 있는 hokuyo_lidar 파일을 px4_Autofpilot 안으로 옮긴다.
+
+- /XTDrone/sitl_config/models에 있는 hokuyo_lidar 파일을 복사한 후에 PX4-Autopilot/Tools/sitl_gazebo/models 안에 넣는다.
+- /XTDrone/sitl_config/worlds에 있는 indoor3.world를 가지고 와서 PX4-Autopilot/Tools/sitl_gazebo/worlds에 넣는다.
+- 
 - 그리고 나서 models 안에 있는 iris_foggy_lidar.sdf 파일을 수정한다.
 ```
 cd ~/PX4-Autopilot/Tools/sitl_gazebo/models/iris_foggy_lidar && gedit iris.foggy_lidar.sdf
@@ -439,7 +450,7 @@ Example launch file: launches the scan matcher with pre-recorded data
 ```
 sudo gedit demo.rviz
 ```
-```html
+```yaml
 Panels:
   - Class: rviz/Displays
     Help Height: 78
@@ -680,7 +691,7 @@ slam_gmapping
 ```
 sudo gedit demo_gmapping.rviz
 ```
-```html
+```yaml
 Panels:
   - Class: rviz/Displays
     Help Height: 78
@@ -905,7 +916,7 @@ Window Geometry:
       </axis>
     </joint>
 
-<!--lidar-->
+ <!--lidar-->
     <include>
       <uri>model://lidar</uri>
       <pose>0 0 -0.05 0 0 0</pose>
@@ -915,7 +926,7 @@ Window Geometry:
       <parent>iris::base_link</parent>
       <child>lidar::link</child>
     </joint>
-<!-- For Stereo camera -->
+ <!-- For Stereo camera -->
     <include>
           <uri>model://stereo_camera</uri>
           <pose>0.1 0 0 0 0 0</pose>
@@ -932,7 +943,7 @@ Window Geometry:
             </limit>
           </axis>
         </joint>
-   ```
+ ```
   ![00](https://user-images.githubusercontent.com/43773374/127591716-1ed012cb-c5d9-430a-86c3-a1d11c0528d2.png)
   - demo.launch와 demo_gmapping.launch 파일을 수정한다.
   ```
@@ -966,3 +977,206 @@ Window Geometry:
   ![Screenshot from 2021-07-30 11-58-00](https://user-images.githubusercontent.com/43773374/127593149-17f525e8-084e-42a0-afbc-ab965a4008d6.png)
 
     
+## 12. 새로운 f450 만들어서 lidar와 opt_flow 그리고 d435 추가하기
+- 일단 먼저 px4-autopilot/model에 들어가서 기존에 있던 custom_f450을 복사한다.
+- 그리고 나서 mission_f450으로 폴더명을 수정했다.
+- 안에 있는 sdf파일도 mission_f450으로 변경한다.
+```html
+<sdf version='1.6'>
+  <model name='mission_f450'>
+    <include>
+      <uri>model://custom_f450</uri>
+    </include>
+   <!-- hokuyo_lidar -->
+    <include>
+      <uri>model://hokuyo_lidar</uri>
+      <pose>0 0 0.25 0 0 0</pose>
+    </include>
+    <joint name="hokuyo_lidar_joint" type="revolute">
+      <parent>custom_f450::base_link</parent>
+      <child>hokuyo_lidar::link</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <upper>0</upper>
+          <lower>0</lower>
+        </limit>
+      </axis>
+    </joint>
+
+  <!--px4flow camera-->
+  <include>
+    <uri>model://px4flow</uri>
+    <pose>0 0 0.1 0 0 0</pose>
+  </include>
+
+  <joint name="px4flow_joint" type="revolute">
+    <parent>custom_f450::base_link</parent>
+    <child>px4flow::link</child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+        <upper>0</upper>
+        <lower>0</lower>
+      </limit>
+    </axis>
+  </joint>
+
+<!--lidar-->
+  <include>
+    <uri>model://lidar</uri>
+    <pose>0 0 0.1 0 0 0</pose>
+  </include>
+
+  <joint name="lidar_joint" type="fixed">
+    <parent>custom_f450::base_link</parent>
+    <child>lidar::link</child>
+  </joint>
+  </model>
+</sdf>
+```
+- display.launch 수정하기
+```
+cd ~/catkin_ws/src/f450/launch && gedit display.launch
+```
+```html
+<launch>
+  <arg name="model" />
+  <param name="robot_description" textfile="$(find f450)/urdf/f450.urdf" />
+  <param name="/use_sim_time" value="true"/>
+  <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+ ### tf ##################################
+
+ <node pkg="tf" type="static_transform_publisher" name="mission_f450_to_lidar" args="0.0 0.0 0.25 0.0 0.0 0.0 /custom_f450/base_link /mission_f450/laser_2d 40" />
+ <node pkg="tf" type="static_transform_publisher" name="mission_f450_to_flow" args="0.0 0.0 0.1 0.0 0.0 0.0 /base_link /px4flow 40" />
+ <node pkg="tf" type="static_transform_publisher" name="mission_f450_to_laser" args="0.0 0.0 0.1 0.0 0.0 0.0 /base_link /lidar 40" />
+
+  #### start the laser scan_matcher ##############################
+
+  <node pkg="laser_scan_matcher" type="laser_scan_matcher_node"
+    name="laser_scan_matcher_node" output="screen">
+    <param name="fixed_frame" value = "odom"/>
+    <param name="base_frame" value = "/custom_f450/base_link"/>
+    <param name="max_iterations" value="10"/>
+    <param name="use_imu" value="false"/>
+    <param name="use_odom" value="false"/>
+    <remap from="scan" to="/mission_f450/scan"/>
+    <remap from="pose2D" to="mission_f450/pose2D"/>
+  </node>
+
+  #### start gmapping ############################################
+
+  <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
+    <param name="base_frame" value='/base_link'/>
+    <param name="map_udpate_interval" value="1.0"/>
+    <param name="maxUrange" value="5.0"/>
+    <param name="sigma" value="0.1"/>
+    <param name="kernelSize" value="1"/>
+    <param name="lstep" value="0.15"/>
+    <param name="astep" value="0.15"/>
+    <param name="iterations" value="1"/>
+    <param name="lsigma" value="0.1"/>
+    <param name="ogain" value="3.0"/>
+    <param name="lskip" value="1"/>
+    <param name="srr" value="0.1"/>
+    <param name="srt" value="0.2"/>
+    <param name="str" value="0.1"/>
+    <param name="stt" value="0.2"/>
+    <param name="linearUpdate" value="1.0"/>
+    <param name="angularUpdate" value="0.5"/>
+    <param name="temporalUpdate" value="0.4"/>
+    <param name="resampleThreshold" value="0.5"/>
+    <param name="particles" value="10"/>
+    <param name="xmin" value="-5.0"/>
+    <param name="ymin" value="-5.0"/>
+    <param name="xmax" value="5.0"/>
+    <param name="ymax" value="5.0"/>
+    <param name="delta" value="0.02"/>
+    <param name="llsamplerange" value="0.01"/>
+    <param name="llsamplestep" value="0.05"/>
+    <param name="lasamplerange" value="0.05"/>
+    <param name="lasamplestep" value="0.05"/>
+    <remap from="scan" to="/mission_f450/scan"/>
+    <remap from="pose2D" to="mission_f450/pose2D"/>
+  </node>
+
+  #### start rviz ################################################
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find f450)/f450_urdf.rviz" />
+</launch>
+```
+- mavros_posix_sitl.launch 수정
+```
+cd ~/PX4-Autopilot/launch && gedit mavros_posix_sitl.launch
+```
+```html
+<?xml version="1.0"?>
+<launch>
+    <!-- MAVROS posix SITL environment launch script -->
+    <!-- launches MAVROS, PX4 SITL, Gazebo environment, and spawns vehicle -->
+    <!-- vehicle pose -->
+    <arg name="x" default="0"/>
+    <arg name="y" default="0"/>
+    <arg name="z" default="0"/>
+    <arg name="R" default="0"/>
+    <arg name="P" default="0"/>
+    <arg name="Y" default="0"/>
+    <!-- vehicle model and world -->
+    <arg name="est" default="ekf2"/>
+    <arg name="vehicle" default="mission_f450"/>
+    <arg name="world" default="$(find mavlink_sitl_gazebo)/worlds/indoor3.world"/>
+    <arg name="sdf" default="$(find mavlink_sitl_gazebo)/models/$(arg vehicle)/$(arg vehicle).sdf"/>
+
+    <!-- gazebo configs -->
+    <arg name="gui" default="true"/>
+    <arg name="debug" default="false"/>
+    <arg name="verbose" default="false"/>
+    <arg name="paused" default="false"/>
+    <arg name="respawn_gazebo" default="false"/>
+    <!-- MAVROS configs -->
+    <arg name="fcu_url" default="udp://:14540@localhost:14557"/>
+    <arg name="respawn_mavros" default="false"/>
+    <!-- PX4 configs -->
+    <arg name="interactive" default="true"/>
+    <!-- PX4 SITL and Gazebo -->
+    <include file="$(find px4)/launch/posix_sitl.launch">
+        <arg name="x" value="$(arg x)"/>
+        <arg name="y" value="$(arg y)"/>
+        <arg name="z" value="$(arg z)"/>
+        <arg name="R" value="$(arg R)"/>
+        <arg name="P" value="$(arg P)"/>
+        <arg name="Y" value="$(arg Y)"/>
+        <arg name="world" value="$(arg world)"/>
+        <arg name="vehicle" value="$(arg vehicle)"/>
+        <arg name="sdf" value="$(arg sdf)"/>
+        <arg name="gui" value="$(arg gui)"/>
+        <arg name="interactive" value="$(arg interactive)"/>
+        <arg name="debug" value="$(arg debug)"/>
+        <arg name="verbose" value="$(arg verbose)"/>
+        <arg name="paused" value="$(arg paused)"/>
+        <arg name="respawn_gazebo" value="$(arg respawn_gazebo)"/>
+    </include>
+    <!-- MAVROS -->
+    <include file="$(find mavros)/launch/px4.launch">
+        <!-- GCS link is provided by SITL -->
+        <arg name="gcs_url" value=""/>
+        <arg name="fcu_url" value="$(arg fcu_url)"/>
+        <arg name="respawn_mavros" value="$(arg respawn_mavros)"/>
+    </include>
+</launch>
+```
+
+- 실행하기
+- qground control 실행
+- gazebo 실행
+```
+roslaunch px4 mavros_posix_sitl.launch
+```
+- rviz 와 gmapping 실행
+```
+roslaunch f450 display.launch
+```
+- orb_slam 실행
+```
+roslaunch orb_slam2_ros orb_slam2_d435_rgbd.launch
+```
