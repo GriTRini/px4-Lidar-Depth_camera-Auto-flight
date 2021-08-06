@@ -384,10 +384,10 @@ cd ~/PX4-Autopilot/launch && gedit mavros_posix_sitl.launch
 ```
 - line 14에서 default를 iris_foggy_lidar로 수정한다.
 - line 15에서 default를 indoor3.world로 수정한다.
-```
+
 ![123](https://user-images.githubusercontent.com/43773374/127287599-f5decda6-da03-49d7-a493-af1c354306f7.png)
 
-```
+
 
 
 - 먼저 pkg를 다운로드 한다.
