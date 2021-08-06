@@ -890,6 +890,12 @@ Window Geometry:
   ```
 
   ![12345](https://user-images.githubusercontent.com/43773374/127287500-2c5f8149-d783-465d-a921-bd6b4f9d55e2.png)
+  
+  - 만약 실행시켰을 때 오류가 난다면 밑의 코드를 실행시켜서 패키지를 다운받는다.
+  ```
+  sudo apt-get install ros-melodic-slam-gmapping
+  ```
+  
 
 ## 11. optical flow senser와 stereo camera 추가하기
   - iris_foggy_lidar에 opt_flow와 stereo camera를 추가한다.
