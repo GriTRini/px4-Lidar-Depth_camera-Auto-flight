@@ -1609,3 +1609,4 @@ roslaunch octomap_server octomap_mapping.launch
 rosrun mavros_simple_control py.py
 ```
 - 먼저 teleopy로 이륙을 시킨다음에 자율주행하는 알고리즘을 실행시키면 된다.
+![Screenshot from 2021-08-19 16-17-02](https://user-images.githubusercontent.com/43773374/130025171-d003026f-de24-4a02-994b-bb601b346130.png)
