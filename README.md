@@ -1189,3 +1189,423 @@ roslaunch orb_slam2_ros orb_slam2_d435_rgbd.launch
 ![0](https://user-images.githubusercontent.com/43773374/128119879-f7764788-975b-42a5-841c-2d569a26e70a.png)
 ![00](https://user-images.githubusercontent.com/43773374/128119883-c96c33de-4193-4bc6-8585-14a3b6c06b16.png)
 ![000](https://user-images.githubusercontent.com/43773374/128119886-5a47bdf0-78ea-4428-bacd-5e67ecfd60ab.png)
+
+13. 최종 프로젝트
+- iris 드론에 전, 후, 좌, 우에 depth camera를 장착한 후에 Lidar를 이용하여 자율주행을 실시하고 depth camera를 이용하여 mapping을 실시한다.
+
+- 맵은 보통 건물의 한 층에 해당하는 형식으로 진행할 것이며 가운데에 복도가 있고 양옆에는 방 또는 다른 공간이 존재한다.
+
+- iris_foggy_lidar 드론 수정
+- 카메라를 전, 후, 좌, 우에 설치한다.
+```html
+<?xml version="1.0" ?>
+<sdf version='1.5'>
+  <model name='iris_foggy_lidar'>
+
+    <include>
+      <uri>model://iris</uri>
+    </include> 
+<!--
+    <include>
+      <uri>model://foggy_lidar</uri>
+      <pose>0 0 0.1 0 1.571 0</pose>
+    </include>
+    <joint name="foggy_lidar_joint" type="revolute">
+      <parent>iris::base_link</parent>
+      <child>foggy_lidar::link</child>
+      <pose>0 0 0.1 0 1.571 0</pose>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <upper>0</upper>
+          <lower>0</lower>
+        </limit>
+      </axis>
+    </joint>
+-->
+<!-- hokuyo_lidar -->
+      <include>
+      <uri>model://hokuyo_lidar</uri>
+      <pose>0 0 0.1 0 0 0</pose>
+    </include>
+    <joint name="hokuyo_lidar_joint" type="revolute">
+      <parent>iris::base_link</parent>
+      <child>hokuyo_lidar::link</child>
+      <pose>0 0 0.1 0 0 0</pose>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <upper>0</upper>
+          <lower>0</lower>
+        </limit>
+      </axis>
+    </joint>
+
+
+<!-- front depth camera -->
+    <include>
+      <uri>model://front_depth_camera</uri>
+      <pose>0.1 0 0 0 0 0</pose>
+    </include>
+    <joint name="front_depth_camera_joint" type="revolute">
+      <child>front_depth_camera::link</child>
+      <parent>iris::base_link</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <upper>0</upper>
+          <lower>0</lower>
+        </limit>
+      </axis>
+    </joint>
+
+<!-- back depth camera -->
+    <include>
+      <uri>model://back_depth_camera</uri>
+      <pose>-0.15 0 0 0 0 3.14</pose>
+    </include>
+    <joint name="back_depth_camera_joint" type="revolute">
+      <child>back_depth_camera::link</child>
+      <parent>iris::base_link</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <upper>0</upper>
+          <lower>0</lower>
+        </limit>
+      </axis>
+    </joint>
+
+<!-- left depth camera -->
+    <include>
+      <uri>model://left_depth_camera</uri>
+      <pose>0 0.1 0 0 0 1.5707</pose>
+    </include>
+    <joint name="left_depth_camera_joint" type="revolute">
+      <child>left_depth_camera::link</child>
+      <parent>iris::base_link</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <upper>0</upper>
+          <lower>0</lower>
+        </limit>
+      </axis>
+    </joint>
+
+<!-- right depth camera -->
+    <include>
+      <uri>model://right_depth_camera</uri>
+      <pose>0 -0.1 0 0 0 -1.5707</pose>
+    </include>
+    <joint name="right_depth_camera_joint" type="revolute">
+      <child>right_depth_camera::link</child>
+      <parent>iris::base_link</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <upper>0</upper>
+          <lower>0</lower>
+        </limit>
+      </axis>
+    </joint>
+
+  </model>
+</sdf>
+
+
+<!-- vim: set noet fenc=utf-8 ff=unix sts=0 sw=4 ts=4 : -->
+```
+
+- 전, 후, 좌, 우 카메라를 각각 model안에 새로 만든다.
+- 전방 카메라
+```html
+<!-- DO NOT EDIT: Generated from depth_camera.sdf.jinja -->
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="front_depth_camera">
+    <pose>0 0 0.035 0 0 0</pose>
+    <link name="link">
+      <inertial>
+        <pose>0.01 0.025 0.025 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.15e-6</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.407e-6</iyy>
+          <iyz>0</iyz>
+          <izz>2.407e-6</izz>
+        </inertia>
+      </inertial>
+      <visual name="visual">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://realsense_camera/meshes/realsense.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <sensor name="depth_camera" type="depth"><update_rate>30</update_rate>
+        <camera>
+          <horizontal_fov>1.02974</horizontal_fov>
+          <image>
+            <format>R8G8B8</format>
+            <width>640</width>
+            <height>480</height>
+          </image>
+          <clip>
+            <near>0.5</near>
+            <far>5</far>
+          </clip>
+        </camera>
+        <plugin filename="libgazebo_ros_openni_kinect.so" name="camera_controller">
+          <cameraName>camera</cameraName>
+          <alwaysOn>true</alwaysOn>
+          <updateRate>20</updateRate>
+          <pointCloudCutoff>0.2</pointCloudCutoff>
+          <pointCloudCutoffMax>20</pointCloudCutoffMax>
+          <imageTopicName>rgb/image_raw</imageTopicName>
+          <cameraInfoTopicName>rgb/camera_info</cameraInfoTopicName>
+          <depthImageTopicName>depth/image_raw</depthImageTopicName>
+          <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName>
+          <pointCloudTopicName>depth/points</pointCloudTopicName>
+          <frameName>front_camera_link</frameName>
+          <distortion_k1>0.0</distortion_k1>
+          <distortion_k2>0.0</distortion_k2>
+          <distortion_k3>0.0</distortion_k3>
+          <distortion_t1>0.0</distortion_t1>
+          <distortion_t2>0.0</distortion_t2>
+        </plugin></sensor>
+    </link>
+  </model>
+</sdf>
+```
+
+- 후방 카메라
+```html
+<!-- DO NOT EDIT: Generated from depth_camera.sdf.jinja -->
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="back_depth_camera">
+    <pose>0 0 0.035 0 0 0</pose>
+    <link name="link">
+      <inertial>
+        <pose>0.01 0.025 0.025 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.15e-6</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.407e-6</iyy>
+          <iyz>0</iyz>
+          <izz>2.407e-6</izz>
+        </inertia>
+      </inertial>
+      <visual name="visual">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://realsense_camera/meshes/realsense.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <sensor name="depth_camera" type="depth"><update_rate>30</update_rate>
+        <camera>
+          <horizontal_fov>1.02974</horizontal_fov>
+          <image>
+            <format>R8G8B8</format>
+            <width>640</width>
+            <height>480</height>
+          </image>
+          <clip>
+            <near>0.5</near>
+            <far>5</far>
+          </clip>
+        </camera>
+        <plugin filename="libgazebo_ros_openni_kinect.so" name="camera_controller">
+          <cameraName>camera</cameraName>
+          <alwaysOn>true</alwaysOn>
+          <updateRate>20</updateRate>
+          <pointCloudCutoff>0.2</pointCloudCutoff>
+          <pointCloudCutoffMax>20</pointCloudCutoffMax>
+          <imageTopicName>rgb/image_raw</imageTopicName>
+          <cameraInfoTopicName>rgb/camera_info</cameraInfoTopicName>
+          <depthImageTopicName>depth/image_raw</depthImageTopicName>
+          <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName>
+          <pointCloudTopicName>depth/points</pointCloudTopicName>
+          <frameName>back_camera_link</frameName>
+          <distortion_k1>0.0</distortion_k1>
+          <distortion_k2>0.0</distortion_k2>
+          <distortion_k3>0.0</distortion_k3>
+          <distortion_t1>0.0</distortion_t1>
+          <distortion_t2>0.0</distortion_t2>
+        </plugin></sensor>
+    </link>
+  </model>
+</sdf>
+```
+- 좌측 카메라
+```html
+<!-- DO NOT EDIT: Generated from depth_camera.sdf.jinja -->
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="left_depth_camera">
+    <pose>0 0 0.035 0 0 0</pose>
+    <link name="link">
+      <inertial>
+        <pose>0.01 0.025 0.025 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.15e-6</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.407e-6</iyy>
+          <iyz>0</iyz>
+          <izz>2.407e-6</izz>
+        </inertia>
+      </inertial>
+      <visual name="visual">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://realsense_camera/meshes/realsense.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <sensor name="depth_camera" type="depth"><update_rate>30</update_rate>
+        <camera>
+          <horizontal_fov>1.02974</horizontal_fov>
+          <image>
+            <format>R8G8B8</format>
+            <width>640</width>
+            <height>480</height>
+          </image>
+          <clip>
+            <near>0.5</near>
+            <far>5</far>
+          </clip>
+        </camera>
+        <plugin filename="libgazebo_ros_openni_kinect.so" name="camera_controller">
+          <cameraName>camera</cameraName>
+          <alwaysOn>true</alwaysOn>
+          <updateRate>20</updateRate>
+          <pointCloudCutoff>0.2</pointCloudCutoff>
+          <pointCloudCutoffMax>20</pointCloudCutoffMax>
+          <imageTopicName>rgb/image_raw</imageTopicName>
+          <cameraInfoTopicName>rgb/camera_info</cameraInfoTopicName>
+          <depthImageTopicName>depth/image_raw</depthImageTopicName>
+          <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName>
+          <pointCloudTopicName>depth/points</pointCloudTopicName>
+          <frameName>left_camera_link</frameName>
+          <distortion_k1>0.0</distortion_k1>
+          <distortion_k2>0.0</distortion_k2>
+          <distortion_k3>0.0</distortion_k3>
+          <distortion_t1>0.0</distortion_t1>
+          <distortion_t2>0.0</distortion_t2>
+        </plugin></sensor>
+    </link>
+  </model>
+</sdf>
+```
+
+- 우측 카메라
+```html
+<!-- DO NOT EDIT: Generated from depth_camera.sdf.jinja -->
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="right_depth_camera">
+    <pose>0 0 0.035 0 0 0</pose>
+    <link name="link">
+      <inertial>
+        <pose>0.01 0.025 0.025 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.15e-6</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.407e-6</iyy>
+          <iyz>0</iyz>
+          <izz>2.407e-6</izz>
+        </inertia>
+      </inertial>
+      <visual name="visual">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://realsense_camera/meshes/realsense.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <sensor name="depth_camera" type="depth"><update_rate>30</update_rate>
+        <camera>
+          <horizontal_fov>1.02974</horizontal_fov>
+          <image>
+            <format>R8G8B8</format>
+            <width>640</width>
+            <height>480</height>
+          </image>
+          <clip>
+            <near>0.5</near>
+            <far>5</far>
+          </clip>
+        </camera>
+        <plugin filename="libgazebo_ros_openni_kinect.so" name="camera_controller">
+          <cameraName>camera</cameraName>
+          <alwaysOn>true</alwaysOn>
+          <updateRate>20</updateRate>
+          <pointCloudCutoff>0.2</pointCloudCutoff>
+          <pointCloudCutoffMax>20</pointCloudCutoffMax>
+          <imageTopicName>rgb/image_raw</imageTopicName>
+          <cameraInfoTopicName>rgb/camera_info</cameraInfoTopicName>
+          <depthImageTopicName>depth/image_raw</depthImageTopicName>
+          <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName>
+          <pointCloudTopicName>depth/points</pointCloudTopicName>
+          <frameName>right_camera_link</frameName>
+          <distortion_k1>0.0</distortion_k1>
+          <distortion_k2>0.0</distortion_k2>
+          <distortion_k3>0.0</distortion_k3>
+          <distortion_t1>0.0</distortion_t1>
+          <distortion_t2>0.0</distortion_t2>
+        </plugin></sensor>
+    </link>
+  </model>
+</sdf>
+```
+- 그리고 나서 전에 pkg로 설치한 octomap_server에 들어가서 octomap_mapping.launch를 수정한다.
+```html
+<!-- 
+  Example launch file for octomap_server mapping: 
+  Listens to incoming PointCloud2 data and incrementally builds an octomap. 
+  The data is sent out in different representations. 
+
+  Copy this file into your workspace and adjust as needed, see
+  www.ros.org/wiki/octomap_server for details  
+-->
+<launch>
+	<node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
+		<param name="resolution" value="0.05" />
+		
+		<!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
+		<param name="frame_id" type="string" value="map" />
+		
+		<!-- maximum range to integrate (speedup!) -->
+		<param name="sensor_model/max_range" value="5.0" />
+		
+		<!-- data source to integrate (PointCloud2) -->
+		<remap from="cloud_in" to="/camera_kinect/depth/points" />
+	
+	</node>
+</launch>
+```
+- 이렇게 하고 명령어를 입력해서 실행해본다.
+```
+roslaunch px4 mavros_posix_sitl.launch
+```
+```
+roslaunch octomap_server octomap_mapping.launch
+```
+```
+rosrun mavros_simple_control py.py
+```
+- 먼저 teleopy로 이륙을 시킨다음에 자율주행하는 알고리즘을 실행시키면 된다.
